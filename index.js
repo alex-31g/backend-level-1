@@ -1,27 +1,31 @@
 import express from 'express';
-
-// ---------------------------
-// Чтобы использовать __dirname в ES6 нужно выполнить следующее:
-import path from 'path';
-const __dirname = path.resolve();
-// ---------------------------
+import mongoose from 'mongoose';
 
 const PORT = 5000;
+
+// URL подключения к БД, полученный при создании облачной БД
+const DB_URL = `mongodb+srv://alex:1111@cluster0.3jnoq.mongodb.net/myFirstDatabase?retryWrites=true&w=majority`; 
+
 const app = express();
 
-// Парсим данные формы
-app.use(express.urlencoded()); 
+app.use(express.json()); 
 
-app.get('/register', (req, res) => {
-	res.sendFile(__dirname + '/register.html');
+app.get('/', (req, res) => {
+	res.status(200).json('Server works');
 });
 
-app.post('/register', (req, res) => {
-	if (!req.body) {
-		return res.sendStatus(400);
+async function startApp() {
+	try {
+		// Подключение к БД
+		await mongoose.connect(DB_URL, { 
+			useNewUrlParser: true,
+			useUnifiedTopology: true,
+			useCreateIndex: true,
+		});
+		app.listen(PORT, () => { console.log(`Server started at ${PORT} port`)});
+	} catch(e) {
+		console.log(e);
 	}
-	console.log(req.body);
-	res.send(`${req.body.userName} - ${req.body.userAge}`);
-});
+}
 
-app.listen(PORT, () => { console.log(`Server started at ${PORT} port`)});
+startApp();
